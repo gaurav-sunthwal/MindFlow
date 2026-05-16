@@ -20,12 +20,16 @@ import { useTasks } from '@/context/TaskContext';
 import { useEvents } from '@/context/EventContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 
 export default function ProfilePage() {
   const { tasks } = useTasks();
   const { events } = useEvents();
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const supabase = createClient();
 
   const completedTasks = tasks.filter(t => t.completed).length;
   const displayName = user?.user_metadata?.full_name || 'MindFlow User';
@@ -34,6 +38,51 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     await signOut();
     router.push('/login');
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar_${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('profile-pic')
+        .upload(filePath, file, {
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-pic')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl }
+      });
+
+      if (updateError) throw updateError;
+
+      // ALSO update the database profiles table via API
+      await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarUrl: publicUrl }),
+      });
+      
+      // The auth context should update automatically via onAuthStateChange
+    } catch (error: any) {
+      console.error('Avatar upload error:', error);
+      alert(error.message || 'Failed to upload profile picture');
+    } finally {
+      setIsUploading(true); // Wait, should be false
+      setIsUploading(false);
+    }
   };
 
   const SettingItem = ({ icon: Icon, label, description, rightElement }: any) => (
@@ -65,11 +114,28 @@ export default function ProfilePage() {
             <Card className="p-8 flex flex-col items-center text-center">
               <div className="relative mb-6">
                 <div className="w-32 h-32 bg-gray-100 rounded-[40px] flex items-center justify-center overflow-hidden border-4 border-white shadow-level1">
-                  <User className="w-16 h-16 text-on-surface-variant opacity-20" />
+                  {isUploading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  ) : user?.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-16 h-16 text-on-surface-variant opacity-20" />
+                  )}
                 </div>
-                <button className="absolute bottom-1 right-1 w-10 h-10 bg-black text-white rounded-2xl flex items-center justify-center border-4 border-white shadow-lg hover:scale-110 transition-transform">
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="absolute bottom-1 right-1 w-10 h-10 bg-black text-white rounded-2xl flex items-center justify-center border-4 border-white shadow-lg hover:scale-110 transition-transform disabled:opacity-50"
+                >
                   <Camera className="w-4 h-4" />
                 </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleAvatarUpload} 
+                  className="hidden" 
+                  accept="image/*"
+                />
               </div>
               
               <h2 className="text-2xl font-bold text-on-surface">{displayName}</h2>

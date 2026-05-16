@@ -100,7 +100,7 @@ export default function LoginPage() {
               title={isLoading ? "Signing in..." : "Sign In"} 
               variant="primary" 
               className="w-full h-14 text-lg" 
-              onClick={handleLogin}
+              type="submit"
               disabled={isLoading}
             />
           </form>

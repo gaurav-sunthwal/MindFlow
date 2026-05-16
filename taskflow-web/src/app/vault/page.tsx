@@ -124,7 +124,9 @@ export default function VaultPage() {
         .createSignedUrl(path, 3600); // URL valid for 1 hour
 
       toast.dismiss(loadingToast);
-      setSelectedFile({ url: data.signedUrl, name, type });
+      if (data) {
+        setSelectedFile({ url: data.signedUrl, name, type });
+      }
     } catch (err) {
       console.error('Signed URL error:', err);
       toast.dismiss(loadingToast);
@@ -148,7 +150,7 @@ export default function VaultPage() {
         const { data, error } = await supabase.storage
           .from('vault')
           .createSignedUrl(path, 60); // valid for 60 seconds
-        if (error) throw error;
+        if (error || !data) throw error || new Error('Failed to generate signed URL');
         downloadUrl = data.signedUrl;
       }
 

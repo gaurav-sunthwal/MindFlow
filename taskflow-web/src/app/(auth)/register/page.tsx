@@ -127,7 +127,7 @@ export default function RegisterPage() {
                 title={isLoading ? "Creating account..." : "Create Account"} 
                 variant="primary" 
                 className="w-full h-14 text-lg shadow-lg" 
-                onClick={handleRegister}
+                type="submit"
                 disabled={isLoading}
               />
             </div>

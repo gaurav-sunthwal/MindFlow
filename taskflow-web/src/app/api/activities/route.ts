@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { tasks, events, notes, profiles } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 

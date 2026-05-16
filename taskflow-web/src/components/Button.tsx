@@ -2,11 +2,12 @@ import React from 'react';
 
 interface ButtonProps {
   title: string;
-  onClick?: () => void;
+  onClick?: (e?: any) => void | Promise<void>;
   variant?: 'primary' | 'secondary' | 'outline';
   loading?: boolean;
   disabled?: boolean;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export default function Button({
@@ -16,6 +17,7 @@ export default function Button({
   loading = false,
   disabled = false,
   className = '',
+  type = 'button',
 }: ButtonProps) {
   const baseStyles = "h-[52px] rounded-lg px-6 flex items-center justify-center transition-all active:scale-95 font-geist font-semibold text-base";
   
@@ -29,6 +31,7 @@ export default function Button({
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={isDisabled}
       className={`

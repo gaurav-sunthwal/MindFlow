@@ -104,7 +104,7 @@ export default function TasksPage() {
                     <Clock className="w-4 h-4 text-on-surface-variant opacity-60" />
                     <span className="text-sm text-on-surface-variant opacity-60">{task.time}</span>
                   </div>
-                  <Chip label={task.category} color={task.completed ? "#c4c7c7" : "#0B1C30"} />
+                  <Chip label={task.category ?? "General"} color={task.completed ? "#c4c7c7" : "#0B1C30"} />
                 </div>
               </div>
             </div>

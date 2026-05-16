@@ -61,7 +61,6 @@ export default function TabLayout() {
           name="notes"
           options={{
             title: 'Notes',
-            tabBarItemStyle: { marginRight: 20 },
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? 'create' : 'create-outline'} size={24} color={color} />
             ),
@@ -71,14 +70,13 @@ export default function TabLayout() {
           name="placeholder"
           options={{
             title: '',
-            tabBarButton: () => <View style={{ width: 110 }} />,
+            tabBarButton: () => <View style={{ width: 70 }} />,
           }}
         />
         <Tabs.Screen
           name="documents"
-          options={{
-            title: 'Documents',
-            tabBarItemStyle: { marginLeft: 20 },
+          options={{ 
+            title: 'Vault',
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? 'document-attach' : 'document-attach-outline'} size={24} color={color} />
             ),

@@ -9,6 +9,7 @@ import {
   Platform,
   RefreshControl
 } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Theme from '../../../constants/Theme';
@@ -108,17 +109,17 @@ export default function Index() {
       >
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            <View>
+            <View style={styles.headerTextContainer}>
               <Text style={styles.dateLabel}>{dateStr}</Text>
               <Text style={styles.title}>{greeting},</Text>
-              <Text style={styles.subtitle}>{userName}</Text>
+              <Text style={styles.subtitle} numberOfLines={1}>{userName}</Text>
             </View>
             <TouchableOpacity 
               onPress={() => router.push('/profile')}
               activeOpacity={0.7}
             >
               <Image 
-                source={require('../../../assets/images/profile_avatar.png')} 
+                source={user?.user_metadata?.avatar_url ? { uri: user.user_metadata.avatar_url } : require('../../../assets/images/profile_avatar.png')} 
                 style={styles.headerAvatar}
               />
             </TouchableOpacity>
@@ -214,7 +215,11 @@ export default function Index() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overview</Text>
           <View style={styles.grid}>
-            <View style={styles.gridItem}>
+            <TouchableOpacity 
+              style={styles.gridItem}
+              onPress={() => router.push('/tasks')}
+              activeOpacity={0.7}
+            >
               <Card style={styles.overviewCard}>
                 <View style={[styles.iconContainer, { backgroundColor: '#E6F4FE' }]}>
                   <Ionicons name="checkmark-circle-outline" size={24} color="#4a654e" />
@@ -222,8 +227,12 @@ export default function Index() {
                 <Text style={styles.overviewLabel}>Pending</Text>
                 <Text style={styles.overviewValue}>{pendingCount}</Text>
               </Card>
-            </View>
-            <View style={styles.gridItem}>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.gridItem}
+              onPress={() => router.push('/tasks')}
+              activeOpacity={0.7}
+            >
               <Card style={styles.overviewCard}>
                 <View style={[styles.iconContainer, { backgroundColor: '#C9E8CB' }]}>
                   <Ionicons name="flag-outline" size={24} color="#4a654e" />
@@ -231,8 +240,12 @@ export default function Index() {
                 <Text style={styles.overviewLabel}>Completed</Text>
                 <Text style={styles.overviewValue}>{completedCount}</Text>
               </Card>
-            </View>
-            <View style={styles.gridItem}>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.gridItem}
+              onPress={() => router.push('/notes')}
+              activeOpacity={0.7}
+            >
               <Card style={styles.overviewCard}>
                 <View style={[styles.iconContainer, { backgroundColor: '#E5EEFF' }]}>
                   <Ionicons name="document-text-outline" size={24} color="#0B1C30" />
@@ -240,16 +253,20 @@ export default function Index() {
                 <Text style={styles.overviewLabel}>Notes</Text>
                 <Text style={styles.overviewValue}>{notes.length}</Text>
               </Card>
-            </View>
-            <View style={styles.gridItem}>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.gridItem}
+              onPress={() => router.push('/documents')}
+              activeOpacity={0.7}
+            >
               <Card style={styles.overviewCard}>
                 <View style={[styles.iconContainer, { backgroundColor: '#E6E2DF' }]}>
                   <Ionicons name="document-attach-outline" size={24} color="#1C1B1A" />
                 </View>
-                <Text style={styles.overviewLabel}>Documents</Text>
+                <Text style={styles.overviewLabel}>Vault</Text>
                 <Text style={styles.overviewValue}>{documents.length}</Text>
               </Card>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -387,11 +404,11 @@ const styles = StyleSheet.create({
     backgroundColor: Theme.colors.background,
   },
   container: {
-    padding: Theme.spacing.marginMobile,
-    paddingTop: 20,
+    padding: wp('5%'),
+    paddingTop: hp('2%'),
   },
   header: {
-    marginBottom: 48,
+    marginBottom: hp('4%'),
   },
   headerTop: {
     flexDirection: 'row',
@@ -399,9 +416,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   headerAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: wp('14%'),
+    height: wp('14%'),
+    borderRadius: wp('7%'),
     borderWidth: 3,
     borderColor: '#ffffff',
     ...Theme.shadows.level1,
@@ -409,18 +426,25 @@ const styles = StyleSheet.create({
   dateLabel: {
     ...Theme.typography.labelCaps,
     color: Theme.colors.onSurfaceVariant,
-    marginBottom: 8,
+    marginBottom: hp('1%'),
+    fontSize: wp('3%'),
   },
   title: {
     ...Theme.typography.displayLg,
-    fontSize: 40,
+    fontSize: wp('8%'),
     color: Theme.colors.onSurface,
+    lineHeight: wp('9.5%'),
   },
   subtitle: {
     ...Theme.typography.displayLg,
-    fontSize: 40,
+    fontSize: wp('8%'),
     color: Theme.colors.onSurfaceVariant,
-    marginTop: -8,
+    marginTop: hp('-0.5%'),
+    lineHeight: wp('9.5%'),
+  },
+  headerTextContainer: {
+    flex: 1,
+    marginRight: wp('3%'),
   },
   section: {
     marginBottom: 40,
@@ -450,15 +474,15 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   overviewCard: {
-    padding: 20,
+    padding: wp('5%'),
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: wp('12%'),
+    height: wp('12%'),
+    borderRadius: wp('3%'),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: hp('2%'),
   },
   overviewLabel: {
     ...Theme.typography.labelCaps,

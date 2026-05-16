@@ -81,8 +81,11 @@ export const api = {
   },
 
   // Auth & Profile
-  auth: {
-    syncProfile: () => fetchWithAuth('/api/auth/sync', { method: 'POST' }),
+  profile: {
+    get: () => fetchWithAuth('/api/profile'),
+    update: (data: { fullName?: string; avatarUrl?: string }) => 
+      fetchWithAuth('/api/profile', { method: 'PATCH', body: JSON.stringify(data) }),
+    syncAuth: () => fetchWithAuth('/api/auth/sync', { method: 'POST' }),
   },
 
   // System Health

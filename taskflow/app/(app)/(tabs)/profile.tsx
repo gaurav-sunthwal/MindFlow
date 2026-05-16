@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
-  RefreshControl
+  RefreshControl,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,17 +20,29 @@ import { useTasks } from '../../../context/TaskContext';
 import { useEvents } from '../../../context/EventContext';
 import { useNotes } from '../../../context/NoteContext';
 import { useDocuments } from '../../../context/DocumentContext';
+import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '../../../utils/supabase';
+import { api } from '../../../utils/api';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshUser } = useAuth();
   const { pendingCount, refreshTasks } = useTasks();
   const { events, refreshEvents } = useEvents();
   const { notes, refreshNotes } = useNotes();
   const { refreshDocuments } = useDocuments();
   const [refreshing, setRefreshing] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.user_metadata?.avatar_url || null);
+
+  // Keep local avatar sync with user metadata updates
+  React.useEffect(() => {
+    if (user?.user_metadata?.avatar_url) {
+      setAvatarUrl(user.user_metadata.avatar_url);
+    }
+  }, [user?.user_metadata?.avatar_url]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -40,6 +54,67 @@ export default function ProfileScreen() {
     ]);
     setRefreshing(false);
   }, [refreshTasks, refreshEvents, refreshNotes, refreshDocuments]);
+ 
+  const handleAvatarUpload = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setIsUploadingAvatar(true);
+        const asset = result.assets[0];
+        const fileExt = asset.uri.split('.').pop();
+        const fileName = `${user?.id}/avatar_${Date.now()}.${fileExt}`;
+        const filePath = fileName;
+
+        const formData = new FormData();
+        formData.append('file', {
+          uri: Platform.OS === 'android' ? asset.uri : asset.uri.replace('file://', ''),
+          name: fileName,
+          type: `image/${fileExt}`,
+        } as any);
+
+        const { data, error: uploadError } = await supabase.storage
+          .from('profile-pic')
+          .upload(filePath, formData, {
+            upsert: true
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('profile-pic')
+          .getPublicUrl(filePath);
+
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: { avatar_url: publicUrl }
+        });
+
+        if (updateError) throw updateError;
+
+        // ALSO update the database profiles table
+        await api.profile.update({ avatarUrl: publicUrl });
+        
+        // Update local state for immediate feedback
+        setAvatarUrl(publicUrl);
+        
+        // Refresh the global auth state so other screens (like Home) update too
+        await refreshUser();
+        
+        Alert.alert('Success', 'Profile picture updated successfully!');
+      }
+    } catch (error: any) {
+      console.error('Avatar upload error:', error);
+      Alert.alert('Error', error.message || 'Failed to upload profile picture');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+ 
 
   const StatItem = ({ label, value }: { label: string; value: string }) => (
     <View style={styles.statItem}>
@@ -105,11 +180,22 @@ export default function ProfileScreen() {
           <View style={styles.headerBackground} />
           
           <View style={styles.avatarContainer}>
-            <Image 
-              source={require('../../../assets/images/profile_avatar.png')} 
-              style={styles.avatar}
-            />
-            <TouchableOpacity style={styles.cameraButton} activeOpacity={0.9}>
+            {isUploadingAvatar ? (
+              <View style={[styles.avatar, styles.loadingAvatar]}>
+                <ActivityIndicator color={Theme.colors.primary} />
+              </View>
+            ) : (
+              <Image 
+                source={avatarUrl ? { uri: avatarUrl } : require('../../../assets/images/profile_avatar.png')} 
+                style={styles.avatar}
+              />
+            )}
+            <TouchableOpacity 
+              style={styles.cameraButton} 
+              activeOpacity={0.9}
+              onPress={handleAvatarUpload}
+              disabled={isUploadingAvatar}
+            >
               <Ionicons name="camera" size={18} color="#ffffff" />
             </TouchableOpacity>
           </View>
@@ -117,8 +203,13 @@ export default function ProfileScreen() {
           <Text style={styles.name}>{userName}</Text>
           <Text style={styles.email}>{userEmail}</Text>
           
-          <TouchableOpacity style={styles.changePhotoButton} activeOpacity={0.6}>
-            <Text style={styles.changePhotoText}>CHANGE PHOTO</Text>
+          <TouchableOpacity 
+            style={styles.changePhotoButton} 
+            activeOpacity={0.6}
+            onPress={handleAvatarUpload}
+            disabled={isUploadingAvatar}
+          >
+            <Text style={styles.changePhotoText}>{isUploadingAvatar ? 'UPLOADING...' : 'CHANGE PHOTO'}</Text>
             <View style={styles.underline} />
           </TouchableOpacity>
         </View>
@@ -212,6 +303,11 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#ffffff',
     ...Theme.shadows.level1,
+  },
+  loadingAvatar: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
   name: {
     ...Theme.typography.headlineLg,

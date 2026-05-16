@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth } from './AuthContext';
 import { useActivities } from './ActivityContext';
 import { api } from '../utils/api';
+import { updateAllWidgets } from '../utils/widget-utils';
 
 export interface Task {
   id: string;
@@ -53,6 +54,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   }, [isAuthenticated, refreshTasks]);
+
+  useEffect(() => {
+    if (isAuthenticated && tasks.length >= 0) {
+      updateAllWidgets({ tasks });
+    }
+  }, [tasks, isAuthenticated]);
 
 
   const addTask = async (title: string, category: string = 'General') => {

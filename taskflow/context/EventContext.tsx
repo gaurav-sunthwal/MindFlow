@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth } from './AuthContext';
 import { useActivities } from './ActivityContext';
 import { api } from '../utils/api';
+import { updateAllWidgets } from '../utils/widget-utils';
 
 export interface Event {
   id: string;
@@ -50,6 +51,12 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsLoading(false);
     }
   }, [isAuthenticated, refreshEvents]);
+
+  useEffect(() => {
+    if (isAuthenticated && events.length >= 0) {
+      updateAllWidgets({ events });
+    }
+  }, [events, isAuthenticated]);
 
 
   const addEvent = async (event: Omit<Event, 'id'>) => {

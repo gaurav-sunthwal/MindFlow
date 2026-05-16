@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth } from './AuthContext';
 import { useActivities } from './ActivityContext';
 import { api } from '../utils/api';
+import { updateAllWidgets } from '../utils/widget-utils';
 
 export interface Note {
   id: string;
@@ -50,6 +51,12 @@ export const NoteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   }, [isAuthenticated, refreshNotes]);
+
+  useEffect(() => {
+    if (isAuthenticated && notes.length >= 0) {
+      updateAllWidgets({ notes });
+    }
+  }, [notes, isAuthenticated]);
 
 
   const addNote = async (title: string, content: string) => {

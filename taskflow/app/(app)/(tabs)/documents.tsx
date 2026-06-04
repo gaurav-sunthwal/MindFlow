@@ -32,7 +32,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function DocumentsScreen() {
   const insets = useSafeAreaInsets();
-  const { documents, refreshDocuments, addDocument, deleteDocument, isLoading } = useDocuments();
+  const { documents, refreshDocuments, addDocument, updateDocument, deleteDocument, isLoading } = useDocuments();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);

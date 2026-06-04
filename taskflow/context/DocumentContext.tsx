@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { api } from '../utils/api';
-import { updateAllWidgets } from '../utils/widget-utils';
 
 export interface Document {
   id: string;
@@ -49,12 +48,6 @@ export const DocumentProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsLoading(false);
     }
   }, [isAuthenticated, refreshDocuments]);
-
-  useEffect(() => {
-    if (isAuthenticated && documents.length >= 0) {
-      updateAllWidgets({ documents });
-    }
-  }, [documents, isAuthenticated]);
 
 
   const addDocument = async (name: string, type: string, size = '0 KB', url = '') => {

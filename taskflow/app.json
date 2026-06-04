@@ -49,93 +49,11 @@
           "cameraPermission": "Allow MindFlow to access your camera to scan and digitize documents."
         }
       ],
-      [
-        "expo-widgets",
-        {
-          "widgets": [
-            {
-              "name": "TaskWidget",
-              "displayName": "Pending Tasks",
-              "description": "Quick view of your upcoming tasks",
-              "supportedFamilies": [
-                "systemSmall",
-                "systemMedium"
-              ]
-            },
-            {
-              "name": "DocWidget",
-              "displayName": "Document Vault",
-              "description": "Access your recent documents",
-              "supportedFamilies": [
-                "systemSmall",
-                "systemMedium"
-              ]
-            },
-            {
-              "name": "EventWidget",
-              "displayName": "Upcoming Events",
-              "description": "See what's next on your calendar",
-              "supportedFamilies": [
-                "systemSmall",
-                "systemMedium"
-              ]
-            },
-            {
-              "name": "NoteWidget",
-              "displayName": "Quick Notes",
-              "description": "View and access your notes",
-              "supportedFamilies": [
-                "systemSmall",
-                "systemMedium"
-              ]
-            }
-          ]
-        }
-      ],
-      [
-        "react-native-android-widget",
-        {
-          "widgets": [
-            {
-              "name": "TaskWidget",
-              "label": "Pending Tasks",
-              "description": "Quick view of your upcoming tasks",
-              "minWidth": "100dp",
-              "minHeight": "100dp",
-              "targetSize": "flexible"
-            },
-            {
-              "name": "DocWidget",
-              "label": "Document Vault",
-              "description": "Access your recent documents",
-              "minWidth": "100dp",
-              "minHeight": "100dp",
-              "targetSize": "flexible"
-            },
-            {
-              "name": "EventWidget",
-              "label": "Upcoming Events",
-              "description": "See what's next on your calendar",
-              "minWidth": "100dp",
-              "minHeight": "100dp",
-              "targetSize": "flexible"
-            },
-            {
-              "name": "NoteWidget",
-              "label": "Quick Notes",
-              "description": "View and access your notes",
-              "minWidth": "100dp",
-              "minHeight": "100dp",
-              "targetSize": "flexible"
-            }
-          ]
-        }
-      ],
       "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},

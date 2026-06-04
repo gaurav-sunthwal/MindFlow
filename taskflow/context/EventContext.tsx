@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth } from './AuthContext';
 import { useActivities } from './ActivityContext';
 import { api } from '../utils/api';
-import { updateAllWidgets } from '../utils/widget-utils';
 
 export interface Event {
   id: string;
@@ -52,18 +51,12 @@ export const EventProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [isAuthenticated, refreshEvents]);
 
-  useEffect(() => {
-    if (isAuthenticated && events.length >= 0) {
-      updateAllWidgets({ events });
-    }
-  }, [events, isAuthenticated]);
-
 
   const addEvent = async (event: Omit<Event, 'id'>) => {
     try {
       const newEvent = await api.events.create(event);
       setEvents(prev => [newEvent, ...prev]);
-      addActivity({ type: 'event', action: 'scheduled', title: event.title });
+      addActivity({ type: 'event', action: 'created', title: event.title });
     } catch (error: any) {
       console.error('Failed to add event:', error);
       alert(error.message || 'Failed to add event');
